@@ -1,0 +1,1 @@
+# ARISA Web application to manage home photos with face recognition
