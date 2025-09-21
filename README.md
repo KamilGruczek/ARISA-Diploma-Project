@@ -27,16 +27,16 @@
 
 ## API Endpoints
 ### 1. Face Detection
-- **Endpoint:** `/api/detect_faces`
+- **Endpoint:** `/detect_faces`
 - **Method:** POST
 - **Description:** Accepts an image upload and returns the locations of detected faces in JSON format.
 
 ### 2. Face Training
-- **Endpoint:** `/api/train`
+- **Endpoint:** `/train`
 - **Method:** POST
 - **Description:** Accepts an image of a face along with the person's name to train the face recognition model.
 
 ### 3. Face Recognition
-- **Endpoint:** `/api/predict`
+- **Endpoint:** `/predict`
 - **Method:** POST
 - **Description:** Accepts an image of a face and returns the predicted name of the person in the image and confidence.
