@@ -3,6 +3,7 @@ import joblib
 from sklearn.calibration import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 
+
 class FaceRecognizer:
     def __init__(self, embedder, n_neighbors=3):
         self.embedder = embedder
@@ -43,7 +44,6 @@ class FaceRecognizer:
             return [], []
         pred_indices = self.knn.predict(X_emb)
         pred_proba = self.knn.predict_proba(X_emb)
-       
         confidences = pred_proba.max(axis=1)
         pred_names = self.le.inverse_transform(pred_indices)
         return pred_names, confidences

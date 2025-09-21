@@ -1,6 +1,7 @@
 import numpy as np
 from mtcnn.mtcnn import MTCNN
 
+
 def convert_results(results):
     if isinstance(results, dict):
         return {k: convert_results(v) for k, v in results.items()}
@@ -11,6 +12,7 @@ def convert_results(results):
     else:
         return results
 
+
 def detect_faces(image):
     detector = MTCNN()
     # detect faces in the image
@@ -20,5 +22,4 @@ def detect_faces(image):
         image = np.stack([image.squeeze()] * 3, axis=-1)
     results = detector.detect_faces(image)
     json_results = convert_results(results)
-    
     return json_results
