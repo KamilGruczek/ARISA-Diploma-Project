@@ -20,23 +20,7 @@
 ## Usage
 1. Start the Flask application:
    ```
-   python API/api_app.py
+   python App/app.py
    ```
 
-2. The API will be available at `http://127.0.0.1:5000`.
-
-## API Endpoints
-### 1. Face Detection
-- **Endpoint:** `/detect_faces`
-- **Method:** POST
-- **Description:** Accepts an image upload and returns the locations of detected faces in JSON format.
-
-### 2. Face Training
-- **Endpoint:** `/train`
-- **Method:** POST
-- **Description:** Accepts an image of a face along with the person's name to train the face recognition model.
-
-### 3. Face Recognition
-- **Endpoint:** `/predict`
-- **Method:** POST
-- **Description:** Accepts an image of a face and returns the predicted name of the person in the image and confidence.
+2. The App will be available at `http://127.0.0.1:5000`.
