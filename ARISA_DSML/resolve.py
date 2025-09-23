@@ -21,5 +21,4 @@ def detect_faces(image):
     if image.shape[-1] != 3:
         image = np.stack([image.squeeze()] * 3, axis=-1)
     results = detector.detect_faces(image)
-    json_results = convert_results(results)
-    return json_results
+    return results

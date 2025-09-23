@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="position: relative; display: block; place-self: center; margin-bottom: 10px;">
+  <!-- Zdjęcie -->
+  <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" id="main-photo" style="max-height:500px; width:auto;">
+
+  <!-- Prostokąty twarzy -->
+  {% for face in photo.faces %}
+  <div class="face-box" id="face-{{ face.id }}"
+      data-x="{{ face.face_rel_x }}"
+      data-y="{{ face.face_rel_y }}"
+      data-w="{{ face.face_rel_w }}"
+      data-h="{{ face.face_rel_h }}">
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Lista osób -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+  {% for face in photo.faces %}
+  <div class="col">
+    <div class="card p-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Wyświetlana nazwa osoby -->
+        <span style="cursor: pointer;" class="person-name person-link" data-face-id="{{ face.id }}">
+          {{ face.person.name if face.person else "Unknown" }}
+          ({{ (face.confidence * 100) | round(2) }}%)
+        </span>
+
+        <!-- Edytowalne pole (ukryte na start) -->
+        <div class="edit-form d-none" data-face-id="{{ face.id }}" data-person-id="{{ face.person.id if face.person else '' }}">
+          <input type="text" class="form-control form-control-sm edit-input" 
+                 value="{{ face.person.name if face.person else '' }}">
+          <button class="btn btn-sm btn-success learn-save-btn">💾 Zapisz</button>
+          <button class="btn btn-sm btn-secondary cancel-btn">✖</button>
+        </div>
+
+        <!-- Przyciski akcji -->
+        <div>
+          <button class="btn btn-sm btn-primary learn-btn">✏️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+document.querySelectorAll(".person-link").forEach(link => {
+  link.addEventListener("mouseenter", function() {
+    let faceId = this.dataset.faceId;
+    document.querySelector("#face-" + faceId).style.border = "2px solid red";
+  });
+  link.addEventListener("mouseleave", function() {
+    let faceId = this.dataset.faceId;
+    document.querySelector("#face-" + faceId).style.border = "2px solid transparent";
+  });
+  link.addEventListener("click", function(e) {
+    e.preventDefault();
+    let faceId = this.dataset.faceId;
+    let box = document.querySelector("#face-" + faceId);
+    box.style.border = "2px solid blue";
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const img = document.getElementById("main-photo");
+
+  img.addEventListener("load", () => {
+    const imgWidth = img.clientWidth;
+    const imgHeight = img.clientHeight;
+
+    document.querySelectorAll(".face-box").forEach(box => {
+      let relX = parseFloat(box.dataset.x);
+      let relY = parseFloat(box.dataset.y);
+      let relW = parseFloat(box.dataset.w);
+      let relH = parseFloat(box.dataset.h);
+
+      box.style.position = "absolute";
+      box.style.left = (relX * imgWidth) + "px";
+      box.style.top = (relY * imgHeight) + "px";
+      box.style.width = (relW * imgWidth) + "px";
+      box.style.height = (relH * imgHeight) + "px";
+      box.style.border = "2px solid transparent";
+    });
+  });
+  
+   document.querySelectorAll(".learn-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+      let col = this.closest("div.col");
+      col.querySelector(".person-name").classList.add("d-none");
+      col.querySelector(".edit-form").classList.remove("d-none");
+      col.querySelector(".learn-save-btn").classList.remove("d-none");
+      this.classList.add("d-none");
+    });
+  });
+
+  // Obsługa kliknięcia "Anuluj"
+  document.querySelectorAll(".cancel-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+      let col = this.closest("div.col");
+      col.querySelector(".person-name").classList.remove("d-none");
+      col.querySelector(".edit-form").classList.add("d-none");
+      col.querySelector(".learn-btn").classList.remove("d-none");
+      col.querySelector(".learn-save-btn").classList.add("d-none");
+    });
+  });
+
+  // Obsługa uczenia nowej osoby
+  document.querySelectorAll(".learn-save-btn").forEach(btn => {
+    btn.addEventListener("click", async function() {
+      let col = this.closest("div.col");
+      let input = col.querySelector(".edit-input");
+      let personId = col.querySelector(".edit-form").dataset.personId;
+      let faceId = col.querySelector(".edit-form").dataset.faceId;
+      let photoId = {{ photo.id }};
+      let newName = input.value;
+
+      if (!personId) {
+        alert("Nieznana osoba nie ma ID w bazie.");
+        return;
+      }
+
+      try {
+        let response = await fetch(`/api/learn_person/${photoId}/${faceId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newName })
+        });
+
+        if (response.ok) {
+          col.querySelector(".person-name").textContent = newName;
+          col.querySelector(".person-name").classList.remove("d-none");
+          col.querySelector(".edit-form").classList.add("d-none");
+          col.querySelector(".learn-btn").classList.remove("d-none");
+        } else {
+          alert("Błąd przy zapisie.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Błąd sieci.");
+      }
+    });
+  });
+});
+</script>
+{% endblock %}
